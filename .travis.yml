@@ -1,0 +1,23 @@
+language: objective-c
+
+env:
+ global:
+  - EnableNuGetPackageRestore=true
+ matrix:
+  - MONO_VER="4.0.1"
+
+before_install:
+ - wget "http://download.mono-project.com/archive/${MONO_VER}/macos-10-x86/MonoFramework-MDK-${MONO_VER}.macos10.xamarin.x86.pkg"
+ - sudo installer -dumplog -pkg "MonoFramework-MDK-${MONO_VER}.macos10.xamarin.x86.pkg" -target /
+ - wget "http://netstorage.unity3d.com/unity/5a2e8fe35a68/MacEditorInstaller/Unity.pkg"
+ - sudo installer -dumplog -verbose -pkg "Unity.pkg" -target /
+
+script:
+ - cd cardboard-fyp-unity
+ - /Applications/Unity/Unity.app/Contents/MacOS/Unity -quit -batchmode -executeMethod BuildScript.PerformBuild -logFile /dev/stdout -serial F3-MAT2-K5S2-RU4H-AEBV-XC4C
+ - xbuild *-csharp.sln
+ - /Applications/Unity/Unity.app/Contents/MacOS/Unity -batchmode -logFile /dev/stdout -executeMethod UnityTest.Batch.RunUnitTests
+
+after_script:
+ - /Applications/Unity/Unity.app/Contents/MacOS/Unity -returnlicense -quit -batchmode -logFile /dev/stdout
+ - cat UnitTestResults.xml
